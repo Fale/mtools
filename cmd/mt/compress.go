@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/fale/mtools/pkg/tgz"
 	"github.com/urfave/cli/v2"
+
+	"github.com/fale/mtools/pkg/tgz"
 )
 
 func compress(ctx *cli.Context) error {

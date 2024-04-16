@@ -3,7 +3,7 @@ package tgz_test
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/fale/mtools/pkg/tgz"
@@ -12,20 +12,20 @@ import (
 func TestCompress(t *testing.T) {
 	// Setup mock folder
 	tmpSrcDir := t.TempDir()
-	if err := os.MkdirAll(path.Join(tmpSrcDir, "empty"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(tmpSrcDir, "empty"), os.ModePerm); err != nil {
 		t.Error(err)
 	}
-	if err := os.MkdirAll(path.Join(tmpSrcDir, "withContent"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(tmpSrcDir, "withContent"), os.ModePerm); err != nil {
 		t.Error(err)
 	}
-	if f, err := os.Create(path.Join(tmpSrcDir, "withContent", "emptyFile")); err != nil {
+	if f, err := os.Create(filepath.Join(tmpSrcDir, "withContent", "emptyFile")); err != nil {
 		t.Error(err)
 	} else {
 		f.Close()
 	}
 
 	tmpDstDir := t.TempDir()
-	f, err := os.OpenFile(path.Join(tmpDstDir, "compress.tar.gz"), os.O_CREATE|os.O_RDWR, os.FileMode(0o600))
+	f, err := os.OpenFile(filepath.Join(tmpDstDir, "compress.tar.gz"), os.O_CREATE|os.O_RDWR, os.FileMode(0o600))
 	if err != nil {
 		t.Error(err)
 	}
@@ -33,5 +33,5 @@ func TestCompress(t *testing.T) {
 	if err := tgz.Compress(tmpSrcDir, f, false); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(path.Join(tmpDstDir, "compress.tar.gz"))
+	fmt.Println(filepath.Join(tmpDstDir, "compress.tar.gz"))
 }

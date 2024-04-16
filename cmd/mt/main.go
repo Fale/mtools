@@ -4,7 +4,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/urfave/cli/v2"
@@ -52,13 +52,13 @@ func main() {
 						Name:    "maildir-folder",
 						Aliases: []string{"m"},
 						Usage:   "folder where the maildir to be archived resides",
-						Value:   path.Join(Must(os.UserHomeDir()), ".mail"),
+						Value:   filepath.Join(Must(os.UserHomeDir()), ".mail"),
 					},
 					&cli.StringFlag{
 						Name:    "archive-folder",
 						Aliases: []string{"a"},
 						Usage:   "folder where the archive need to resides",
-						Value:   path.Join(Must(os.UserHomeDir()), ".mail", "archive"),
+						Value:   filepath.Join(Must(os.UserHomeDir()), ".mail", "archive"),
 					},
 					&cli.TimestampFlag{
 						Name:     "cutoff",
@@ -85,13 +85,13 @@ func main() {
 						Name:    "archive-folder",
 						Aliases: []string{"a"},
 						Usage:   "the archive folder",
-						Value:   path.Join(Must(os.UserHomeDir()), ".mail", "archive"),
+						Value:   filepath.Join(Must(os.UserHomeDir()), ".mail", "archive"),
 					},
 					&cli.StringFlag{
 						Name:    "compressed-folder",
 						Aliases: []string{"c"},
 						Usage:   "folder where the archive need to resides",
-						Value:   path.Join(Must(os.UserHomeDir()), ".mail", "compressed-archive"),
+						Value:   filepath.Join(Must(os.UserHomeDir()), ".mail", "compressed-archive"),
 					},
 				},
 			},

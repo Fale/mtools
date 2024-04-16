@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/mail"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -22,8 +21,7 @@ func archive(ctx *cli.Context) error {
 		return fmt.Errorf("missing maildir-name")
 	}
 
-	mbSkips := []string{"new", "cur", "tmp"}
-	err := filepath.Walk(path.Join(ctx.String("maildir-folder"), ctx.Args().First()), func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk(filepath.Join(ctx.String("maildir-folder"), ctx.Args().First()), func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			slog.Error("prevent panic by handling failure accessing a path", "path", path, "error", err)
 			return err
@@ -31,8 +29,8 @@ func archive(ctx *cli.Context) error {
 		if !info.IsDir() {
 			return nil
 		}
-		if slices.Contains(mbSkips, info.Name()) {
-			slog.Info("skipping a dir", "path", path)
+		if _, err := os.Stat(filepath.Join(path, "cur")); err != nil {
+			slog.Debug("ignoring folder since is not a maildir", "directory", path)
 			return nil
 		}
 		if slices.Contains(ctx.StringSlice("skip-folders"), info.Name()) {
@@ -76,7 +74,7 @@ func archiveSingleFolder(srcFolder string, archiveFolder string, mboxName string
 		if msgDate.After(cutOff) {
 			continue
 		}
-		archivePath := path.Join(archiveFolder, msgDate.Format("2006"), msgDate.Format("01"), mboxName)
+		archivePath := filepath.Join(archiveFolder, msgDate.Format("2006"), msgDate.Format("01"), mboxName)
 		if err := os.MkdirAll(archivePath, os.ModePerm); err != nil {
 			return err
 		}
