@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"slices"
 
@@ -31,11 +32,11 @@ func markRead(ctx *cli.Context) error {
 		}
 		slog.Info("processing a dir", "path", path)
 
-		d := maildir.Dir(path)
-		if !isMailDir(d) {
-			slog.Info("this is not a mailDir", "folder", path)
+		if _, err := os.Stat(filepath.Join(path, "cur")); err != nil {
+			slog.Debug("ignoring folder since is not a maildir", "directory", path)
 			return nil
 		}
+		d := maildir.Dir(path)
 
 		if ctx.Bool("include-new") {
 			if _, err := d.Unseen(); err != nil {
