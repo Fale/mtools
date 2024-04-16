@@ -77,6 +77,25 @@ func main() {
 				},
 			},
 			{
+				Name:   "compress-archive",
+				Usage:  "compress-archive",
+				Action: compress,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "archive-folder",
+						Aliases: []string{"a"},
+						Usage:   "the archive folder",
+						Value:   path.Join(Must(os.UserHomeDir()), ".mail", "archive"),
+					},
+					&cli.StringFlag{
+						Name:    "compressed-folder",
+						Aliases: []string{"c"},
+						Usage:   "folder where the archive need to resides",
+						Value:   path.Join(Must(os.UserHomeDir()), ".mail", "compressed-archive"),
+					},
+				},
+			},
+			{
 				Name:   "mark-read",
 				Usage:  "mark-read FOLDER",
 				Action: markRead,
