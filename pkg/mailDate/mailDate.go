@@ -8,15 +8,17 @@ import (
 	"time"
 )
 
+// GetDate returns a probable date of the email.
+// If the Date header is not set the Received header will be used instead.
 func GetDate(msg mail.Message) (time.Time, error) {
-	msgDate, err := parseDate(msg.Header.Get("Date"))
-	if err != nil {
-		msgDate, err = getDateFromReceived(msg.Header.Get("Received"))
-		if err != nil {
-			return time.Time{}, err
-		}
+	if msgDate, err := parseDate(msg.Header.Get("Date")); err == nil {
+		return msgDate, nil
 	}
-	return msgDate, nil
+	msgDate, err := getDateFromReceived(msg.Header.Get("Received"))
+	if err == nil {
+		return msgDate, nil
+	}
+	return time.Time{}, err
 }
 
 func isDateOK(t time.Time) bool {

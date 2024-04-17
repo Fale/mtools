@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+// Compress a folder to a provided io.Writer buffer as a .tar.gz.
+// RelPath is used to define if the paths in the .tar.gz are relative to the folder or absolutes.
 func Compress(folder string, buf io.Writer, relPath bool) error {
 	gb := gzip.NewWriter(buf)
 	tb := tar.NewWriter(gb)

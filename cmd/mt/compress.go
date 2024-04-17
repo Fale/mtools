@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/urfave/cli/v2"
 
@@ -22,16 +24,36 @@ func compress(ctx *cli.Context) error {
 		if !info.IsDir() {
 			return nil
 		}
-
 		if _, err := os.Stat(filepath.Join(path, "cur")); err != nil {
 			slog.Debug("ignoring folder since is not a maildir", "directory", path)
 			return nil
 		}
-
 		slog.Info("processing a dir", "path", path)
 
 		pathSlice := strings.Split(fmt.Sprintf(".%s", strings.TrimPrefix(path, filepath.Clean(ctx.String("archive-folder")))), "/")
-		f, err := os.OpenFile(filepath.Join(ctx.String("compressed-folder"), fmt.Sprintf("%s-%s-%s.tar.gz", pathSlice[1], pathSlice[2], pathSlice[3])), os.O_CREATE|os.O_RDWR, os.FileMode(0o600))
+		pars := struct {
+			Year    string
+			Month   string
+			MailDir string
+		}{
+			pathSlice[1],
+			pathSlice[2],
+			pathSlice[3],
+		}
+		tmpl, err := template.New("test").Parse(ctx.String("destination"))
+		if err != nil {
+			slog.Error("impossible to parse the destination string", "error", err)
+		}
+		var destination bytes.Buffer
+		err = tmpl.Execute(&destination, pars)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(destination.String())
+		if err := os.MkdirAll(filepath.Dir(destination.String()), os.ModePerm); err != nil {
+			return err
+		}
+		f, err := os.OpenFile(destination.String(), os.O_CREATE|os.O_RDWR, os.FileMode(0o600))
 		if err != nil {
 			return err
 		}
