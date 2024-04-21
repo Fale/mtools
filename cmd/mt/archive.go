@@ -58,7 +58,7 @@ func archive(ctx *cli.Context) error {
 			if msgDate.After(*ctx.Timestamp("cutoff")) {
 				return nil
 			}
-			archivePath := filepath.Join(path, msgDate.Format("2006"), msgDate.Format("01"), ctx.Args().First())
+			archivePath := filepath.Join(ctx.String("archive-folder"), msgDate.Format("2006"), msgDate.Format("01"), ctx.Args().First())
 			if err := os.MkdirAll(archivePath, os.ModePerm); err != nil {
 				return err
 			}
