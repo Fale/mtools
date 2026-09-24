@@ -43,3 +43,58 @@ func Compress(source string, w io.Writer, relPath bool) error {
 		return err
 	})
 }
+
+// CompressFiles compresses selected files from a source maildir and includes
+// the maildir directory structure needed when extracting the archive.
+func CompressFiles(source string, files []string, w io.Writer) error {
+	gb := gzip.NewWriter(w)
+	defer gb.Close()
+	tb := tar.NewWriter(gb)
+	defer tb.Close()
+
+	paths := []string{source, filepath.Join(source, "cur"), filepath.Join(source, "new"), filepath.Join(source, "tmp")}
+	paths = append(paths, files...)
+	seen := make(map[string]struct{}, len(paths))
+	for _, path := range paths {
+		if _, ok := seen[path]; ok {
+			continue
+		}
+		seen[path] = struct{}{}
+		info, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(source, path)
+		if err != nil {
+			return err
+		}
+		header, err := tar.FileInfoHeader(info, path)
+		if err != nil {
+			return err
+		}
+		if rel == "." {
+			header.Name = "."
+		} else {
+			header.Name = filepath.ToSlash(filepath.Join(".", rel))
+		}
+		if err := tb.WriteHeader(header); err != nil {
+			return err
+		}
+		if info.IsDir() {
+			continue
+		}
+		data, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		_, copyErr := io.Copy(tb, data)
+		closeErr := data.Close()
+		if copyErr != nil {
+			return copyErr
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+	}
+	return nil
+}
